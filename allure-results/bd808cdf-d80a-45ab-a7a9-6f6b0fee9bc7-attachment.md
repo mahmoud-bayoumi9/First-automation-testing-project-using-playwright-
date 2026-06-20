@@ -1,0 +1,137 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: Register.spec.js >> register with valid data
+- Location: tests\Register.spec.js:14:5
+
+# Error details
+
+```
+Error: page.goto: Target page, context or browser has been closed
+Call log:
+  - navigating to "https://automationexercise.com/", waiting until "load"
+
+```
+
+# Test source
+
+```ts
+  1   | import { test, expect } from '@playwright/test';
+  2   | const HomePage = require('../pages/home');
+  3   | const RegisterPage = require('../pages/RegisterPage');
+  4   | const confirmationPage = require('../pages/confirmationPage');
+  5   | let page;
+  6   | test.beforeEach(async function({browser}){
+  7   |     const context = await browser.newContext();
+  8   |     page = await context.newPage(); 
+  9   |     await page.route('**/*googlesyndication*', route => route.abort());
+  10  |     await page.route('**/*googleads*', route => route.abort());
+  11  |     await page.route('**/*doubleclick*', route => route.abort());
+> 12  |     await page.goto("https://automationexercise.com/");
+      |                ^ Error: page.goto: Target page, context or browser has been closed
+  13  | })
+  14  | test("register with valid data",async ()=>{
+  15  |     const homePage=new HomePage(page);
+  16  |     await homePage.gotToRegisterPage();
+  17  |     const registerPage=new RegisterPage(page);
+  18  |     await registerPage.enterUserName("Abanob");
+  19  |     await registerPage.enterUserEmail("abanob.soror@gmail.com");
+  20  |     await registerPage.clickOnRegister();
+  21  |     await expect(new confirmationPage(page).verify()).toBeVisible()
+  22  | })
+  23  | test("Validate signup with empty name field",async ()=>{
+  24  |     const homePage=new HomePage(page);
+  25  |     await homePage.gotToRegisterPage();
+  26  |     const registerPage=new RegisterPage(page);
+  27  |     await registerPage.enterUserEmail("abanob.soror@gmail.com");
+  28  |     await registerPage.clickOnRegister();
+  29  |     await expect(registerPage.registerName).toHaveAttribute('required');
+  30  |     const validated=await registerPage.registerName.evaluate(element=>element.validationMessage);
+  31  |     if(validated==="Please fill out this field."){
+  32  |         return true;
+  33  |     }else{
+  34  |         return false;
+  35  |     }
+  36  |      console.log(validated);
+  37  | })
+  38  | test("Validate signup with empty Email field",async ()=>{
+  39  |     const homePage=new HomePage(page);
+  40  |     await homePage.gotToRegisterPage();
+  41  |     const registerPage=new RegisterPage(page);
+  42  |     await registerPage.enterUserName("abanob");
+  43  |     await registerPage.clickOnRegister();
+  44  |     await expect(registerPage.registerEmail).toHaveAttribute('required');
+  45  |     const validated=await registerPage.registerEmail.evaluate(element=>element.validationMessage);
+  46  |     if(validated==="Please fill out this field."){
+  47  |         return true;
+  48  |     }else{
+  49  |         return false;
+  50  |     }
+  51  |      console.log(validated);
+  52  | })
+  53  | test("Validate signup with invalid email format",async ()=>{
+  54  |     const homePage=new HomePage(page);
+  55  |     await homePage.gotToRegisterPage();
+  56  |     const registerPage=new RegisterPage(page);
+  57  |     await registerPage.enterUserName("abanob");
+  58  |     await registerPage.enterUserEmail("abanob.sororgmail.com");
+  59  |     await registerPage.clickOnRegister();
+  60  |     await expect(registerPage.registerEmail).toHaveAttribute('required');
+  61  |     const validated=await registerPage.registerEmail.evaluate(element=>element.validationMessage);
+  62  |     if(validated.includes("Please include an '@' in the email address. 'abanob.sororgmail.com' is missing an '@'.")){
+  63  |         return true;
+  64  |     }else{
+  65  |         return false;
+  66  |     }
+  67  |      console.log(validated);
+  68  | })
+  69  | test("Validate signup with spaces in email field",async ()=>{
+  70  |     const homePage=new HomePage(page);
+  71  |     await homePage.gotToRegisterPage();
+  72  |     const registerPage=new RegisterPage(page);
+  73  |     await registerPage.enterUserName("abanob");
+  74  |     await registerPage.enterUserEmail("aba    nob.soror@gmail.com");
+  75  |     await registerPage.clickOnRegister();
+  76  |     await expect(registerPage.registerEmail).toHaveAttribute('required');
+  77  |     const validated=await registerPage.registerEmail.evaluate(element=>element.validationMessage);
+  78  |     if(validated.includes("A part followed by '@' should not contain the symbol ' '")){
+  79  |         return true;
+  80  |     }else{
+  81  |         return false;
+  82  |     }
+  83  |      console.log(validated);
+  84  | })
+  85  | test("Verify signup accepts email containing numeric values",async ()=>{
+  86  |     const homePage=new HomePage(page);
+  87  |     await homePage.gotToRegisterPage();
+  88  |     const registerPage=new RegisterPage(page);
+  89  |     await registerPage.enterUserName("abanob");
+  90  |     await registerPage.enterUserEmail("abanob.soror2017@gmail.com");
+  91  |     await registerPage.clickOnRegister();
+  92  |       await expect(new confirmationPage(page).verify()).toBeVisible()
+  93  |  
+  94  | })
+  95  | test("Validate signup with spaces-only input in name field",async ()=>{
+  96  |     const homePage=new HomePage(page);
+  97  |     await homePage.gotToRegisterPage();
+  98  |     const registerPage=new RegisterPage(page);
+  99  |     await registerPage.enterUserName(" ");
+  100 |     await registerPage.enterUserEmail("abanob.soror2017@gmail.com");
+  101 |     await registerPage.clickOnRegister();
+  102 |    const errorMessage = page.getByText("Name cannot be blank"); 
+  103 |     await expect(errorMessage).toBeVisible();
+  104 |  
+  105 | })
+  106 | test("Verify signup with numeric values in username",async ()=>{
+  107 |     const homePage=new HomePage(page);
+  108 |     await homePage.gotToRegisterPage();
+  109 |     const registerPage=new RegisterPage(page);
+  110 |     await registerPage.enterUserName("Sorour123");
+  111 |     await registerPage.enterUserEmail("abanob.soror2017@gmail.com");
+  112 |     await registerPage.clickOnRegister();
+```

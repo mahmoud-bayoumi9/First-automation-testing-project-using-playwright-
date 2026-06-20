@@ -1,0 +1,3 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","13079","Validate account creation without address line 2","chromium","2026-06-19","passed","2026-06-19","","confirmation.spec.js","",""
+"","40178","Verify mobile number field accepts spaces between digits","chromium","2026-06-19","broken","2026-06-19","","confirmation.spec.js","",""
